@@ -3,10 +3,6 @@ import numpy as np
 import pandas as pd
 
 
-# ============================================================
-# Configuration
-# ============================================================
-
 RANDOM_SEED = 42
 N_SAMPLES_PER_CLASS = 1000
 
@@ -25,10 +21,6 @@ CLASS_IDS = {
 
 OUTPUT_DIR = os.path.join("data", "raw")
 
-
-# ============================================================
-# Utility functions
-# ============================================================
 
 def gaussian_curve(t, center, width):
     """Generate a Gaussian-shaped curve."""
@@ -67,10 +59,6 @@ def smooth_noise(rng, size, scale=1.0):
 
     return smoothed
 
-
-# ============================================================
-# Terrain-specific parameters
-# ============================================================
 
 TERRAIN_PARAMETERS = {
     "HF": {
@@ -123,10 +111,6 @@ TERRAIN_PARAMETERS = {
 }
 
 
-# ============================================================
-# Generate terrain-specific normal-force profile
-# ============================================================
-
 def generate_normal_force(
     terrain,
     t,
@@ -144,9 +128,6 @@ def generate_normal_force(
 
     width_normalized = width / N_TIME_STEPS
 
-    # --------------------------------------------------------
-    # HF: concentrated, relatively sharp contact
-    # --------------------------------------------------------
 
     if terrain == "HF":
 
@@ -156,11 +137,6 @@ def generate_normal_force(
             width_normalized
         )
 
-    # --------------------------------------------------------
-    # LF: similar basic contact profile to HF.
-    # The main terrain distinction is shear/slip.
-    # --------------------------------------------------------
-
     elif terrain == "LF":
 
         force = amplitude * gaussian_curve(
@@ -169,8 +145,7 @@ def generate_normal_force(
             width_normalized
         )
 
-        # Small asymmetry caused by changing contact
-        # conditions.
+        
         asymmetry = rng.uniform(-0.08, 0.08)
 
         force *= (
@@ -178,14 +153,9 @@ def generate_normal_force(
             + asymmetry * (t - center)
         )
 
-    # --------------------------------------------------------
-    # D: broad, flatter contact profile
-    # --------------------------------------------------------
-
+   
     elif terrain == "D":
 
-        # Combine two nearby broad Gaussian components
-        # to create a flatter contact region.
         component_1 = gaussian_curve(
             t,
             center - 0.04,
@@ -203,9 +173,6 @@ def generate_normal_force(
             + 0.55 * component_2
         )
 
-    # --------------------------------------------------------
-    # G: irregular / multi-peak contact
-    # --------------------------------------------------------
 
     elif terrain == "G":
 
@@ -215,7 +182,7 @@ def generate_normal_force(
             width_normalized
         )
 
-        # Secondary contact peaks.
+      
         peak_1 = gaussian_curve(
             t,
             center - rng.uniform(0.08, 0.13),
@@ -241,11 +208,6 @@ def generate_normal_force(
 
     return force
 
-
-# ============================================================
-# Generate one robot step
-# ============================================================
-
 def generate_step(terrain, rng):
     """
     Generate one synthetic robot step.
@@ -268,10 +230,6 @@ def generate_step(terrain, rng):
         N_TIME_STEPS
     )
 
-    # --------------------------------------------------------
-    # Random step-specific parameters
-    # --------------------------------------------------------
-
     amplitude = rng.uniform(
         *params["force_amplitude"]
     )
@@ -290,10 +248,6 @@ def generate_step(terrain, rng):
         2.0
     )
 
-    # --------------------------------------------------------
-    # Generate shared terrain-specific force profile
-    # --------------------------------------------------------
-
     base_force = generate_normal_force(
         terrain,
         t,
@@ -305,20 +259,13 @@ def generate_step(terrain, rng):
 
     base_force += baseline
 
-    # --------------------------------------------------------
-    # Shared variation across all five taxels
-    #
-    # This represents the fact that all taxels experience
-    # the same underlying contact event.
-    # --------------------------------------------------------
-
     shared_variation = smooth_noise(
         rng,
         N_TIME_STEPS,
         scale=rng.uniform(0.8, 1.5)
     )
 
-    # Granular terrain gets stronger shared irregularity.
+   
     if terrain == "G":
 
         shared_variation += smooth_noise(
@@ -327,30 +274,23 @@ def generate_step(terrain, rng):
             scale=rng.uniform(2.0, 4.0)
         )
 
-    # Deformable terrain remains smoother.
     elif terrain == "D":
 
         shared_variation *= 0.5
 
-    # --------------------------------------------------------
-    # Generate five normal-force taxels
-    # --------------------------------------------------------
+  
 
     normal_channels = []
 
     for taxel in range(5):
 
-        # ----------------------------------------------------
-        # Each taxel receives a slightly different proportion
-        # of the same underlying force.
-        # ----------------------------------------------------
+       
 
         sensor_scale = rng.uniform(
             0.90,
             1.08
         )
 
-        # Only a very small timing difference.
         shift = rng.integers(
             -1,
             2
@@ -361,21 +301,11 @@ def generate_step(terrain, rng):
             shift
         )
 
-        # ----------------------------------------------------
-        # Shared terrain variation
-        # ----------------------------------------------------
-
         shifted_variation = np.roll(
             shared_variation,
             shift
         )
 
-        # ----------------------------------------------------
-        # Small taxel-specific noise
-        #
-        # Much smaller than before so the five curves remain
-        # correlated.
-        # ----------------------------------------------------
 
         individual_noise_scale = (
             rng.uniform(
@@ -393,22 +323,13 @@ def generate_step(terrain, rng):
             scale=individual_noise_scale
         )
 
-        # ----------------------------------------------------
-        # Combine components
-        # ----------------------------------------------------
-
         signal = (
             shifted_force * sensor_scale
             + shifted_variation
             + individual_noise
         )
 
-        # ----------------------------------------------------
-        # Additional granular irregularity
-        #
-        # Same underlying irregularity is shared across
-        # taxels, but each taxel responds slightly differently.
-        # ----------------------------------------------------
+   
 
         if terrain == "G":
 
@@ -423,9 +344,7 @@ def generate_step(terrain, rng):
 
             signal += granular_component
 
-        # ----------------------------------------------------
-        # Deformable terrain remains smooth
-        # ----------------------------------------------------
+      
 
         elif terrain == "D":
 
@@ -449,9 +368,7 @@ def generate_step(terrain, rng):
                 mode="valid"
             )
 
-        # ----------------------------------------------------
-        # Force cannot be negative
-        # ----------------------------------------------------
+      
 
         signal = np.maximum(
             signal,
@@ -466,9 +383,7 @@ def generate_step(terrain, rng):
         normal_channels
     )
 
-    # ========================================================
-    # Generate shear-force channel
-    # ========================================================
+   
 
     shear_amplitude = rng.uniform(
         *params["shear_amplitude"]
@@ -501,10 +416,7 @@ def generate_step(terrain, rng):
         + shear_noise
     )
 
-    # --------------------------------------------------------
-    # LF: strong oscillations caused by slip
-    # --------------------------------------------------------
-
+    
     if terrain == "LF":
 
         frequency = rng.uniform(
@@ -525,9 +437,6 @@ def generate_step(terrain, rng):
 
         shear_signal += oscillation
 
-    # --------------------------------------------------------
-    # G: irregular shear fluctuations
-    # --------------------------------------------------------
 
     elif terrain == "G":
 
@@ -542,9 +451,7 @@ def generate_step(terrain, rng):
 
         shear_signal += irregularity
 
-    # --------------------------------------------------------
-    # D: smoother / lower shear
-    # --------------------------------------------------------
+   
 
     elif terrain == "D":
 
@@ -553,26 +460,19 @@ def generate_step(terrain, rng):
             0.95
         )
 
-    # --------------------------------------------------------
-    # Allow positive and negative shear values
-    # --------------------------------------------------------
+    
 
     shear_signal -= (
         np.mean(shear_signal) * 0.15
     )
 
-    # ========================================================
-    # Combine all six tactile channels
-    # ========================================================
-
+ 
     tactile_data = np.vstack([
         normal_channels,
         shear_signal
     ])
 
-    # ========================================================
-    # Generate control / gait variables
-    # ========================================================
+   
 
     motor_rpm_mean = rng.uniform(
         *params["rpm"]
@@ -592,10 +492,7 @@ def generate_step(terrain, rng):
         + rpm_variation
     )
 
-    # --------------------------------------------------------
-    # Gait timing
-    # --------------------------------------------------------
-
+   
     Ts = rng.uniform(
         0.25,
         0.55
@@ -606,18 +503,14 @@ def generate_step(terrain, rng):
         0.95
     )
 
-    # --------------------------------------------------------
-    # Slow angular velocity
-    # --------------------------------------------------------
+    
 
     omega_slow = rng.uniform(
         0.5,
         1.5
     )
 
-    # --------------------------------------------------------
-    # Input current
-    # --------------------------------------------------------
+  
 
     mean_current = rng.uniform(
         *params["current"]
@@ -648,10 +541,6 @@ def generate_step(terrain, rng):
         0
     )
 
-    # --------------------------------------------------------
-    # Store control variables
-    # --------------------------------------------------------
-
     control_data = {
         "motor_rpm": motor_rpm_signal,
         "Ts": Ts,
@@ -666,9 +555,7 @@ def generate_step(terrain, rng):
     )
 
 
-# ============================================================
-# Generate complete dataset
-# ============================================================
+
 
 def generate_dataset():
 
@@ -681,9 +568,7 @@ def generate_dataset():
         * N_SAMPLES_PER_CLASS
     )
 
-    # --------------------------------------------------------
-    # Allocate arrays
-    # --------------------------------------------------------
+    
 
     tactile_dataset = np.zeros(
         (
@@ -729,9 +614,7 @@ def generate_dataset():
 
     sample_index = 0
 
-    # ========================================================
-    # Generate samples class by class
-    # ========================================================
+   
 
     for terrain in CLASS_NAMES:
 
@@ -780,10 +663,7 @@ def generate_dataset():
 
             sample_index += 1
 
-    # ========================================================
-    # Shuffle dataset
-    # ========================================================
-
+   
     indices = rng.permutation(
         total_samples
     )
@@ -808,18 +688,14 @@ def generate_dataset():
         omega_slow_values[indices]
     )
 
-    # ========================================================
-    # Create output directory
-    # ========================================================
+    
 
     os.makedirs(
         OUTPUT_DIR,
         exist_ok=True
     )
 
-    # ========================================================
-    # Save tactile data
-    # ========================================================
+   
 
     np.save(
         os.path.join(
@@ -829,9 +705,7 @@ def generate_dataset():
         tactile_dataset
     )
 
-    # ========================================================
-    # Save labels
-    # ========================================================
+   
 
     labels_df = pd.DataFrame({
         "label_id": labels,
@@ -849,9 +723,6 @@ def generate_dataset():
         index=False
     )
 
-    # ========================================================
-    # Save control variables
-    # ========================================================
 
     control_df = pd.DataFrame({
         "Ts": Ts_values,
@@ -877,9 +748,7 @@ def generate_dataset():
         index=False
     )
 
-    # ========================================================
-    # Save time-dependent control signals
-    # ========================================================
+    
 
     np.save(
         os.path.join(
@@ -897,9 +766,7 @@ def generate_dataset():
         input_current
     )
 
-    # ========================================================
-    # Print summary
-    # ========================================================
+    
 
     print(
         "\nDataset generation complete!"
@@ -919,40 +786,15 @@ def generate_dataset():
 
     for class_name, class_id in CLASS_IDS.items():
 
-        count = np.sum(
-            labels == class_id
-        )
-
-        print(
-            f"{class_name}: {count}"
-        )
+        count = np.sum(labels == class_id)
+        print(f"{class_name}: {count}")
 
     print("\nFiles created:")
-
-    print(
-        "data/raw/tactile_data.npy"
-    )
-
-    print(
-        "data/raw/labels.csv"
-    )
-
-    print(
-        "data/raw/control_data.csv"
-    )
-
-    print(
-        "data/raw/motor_rpm.npy"
-    )
-
-    print(
-        "data/raw/input_current.npy"
-    )
-
-
-# ============================================================
-# Main
-# ============================================================
+    print("data/raw/tactile_data.npy")
+    print("data/raw/labels.csv")
+    print("data/raw/control_data.csv")
+    print("data/raw/motor_rpm.npy")
+    print("data/raw/input_current.npy")
 
 if __name__ == "__main__":
     generate_dataset()
