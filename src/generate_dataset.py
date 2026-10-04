@@ -73,66 +73,53 @@ def smooth_noise(rng, size, scale=1.0):
 # ============================================================
 
 TERRAIN_PARAMETERS = {
-
-    # --------------------------------------------------------
-    # High friction + high stiffness
-    # --------------------------------------------------------
     "HF": {
-        "force_amplitude": (85, 110),
-        "contact_width": (5.5, 8.0),
+        "force_amplitude": (80, 105),
+        "contact_width": (6.0, 9.0),
         "force_noise": (1.5, 3.0),
 
-        "shear_amplitude": (3, 7),
-        "shear_noise": (0.5, 1.0),
+        "shear_amplitude": (4, 9),
+        "shear_noise": (0.8, 1.8),
 
-        "rpm": (135, 165),
-        "current": (1.8, 2.5),
+        "rpm": (125, 160),
+        "current": (1.9, 2.6)
     },
 
-    # --------------------------------------------------------
-    # Low friction + low stiffness
-    # --------------------------------------------------------
     "LF": {
-        "force_amplitude": (78, 105),
+        "force_amplitude": (76, 102),
         "contact_width": (6.5, 9.5),
-        "force_noise": (2.5, 5.0),
+        "force_noise": (2.0, 4.0),
 
-        "shear_amplitude": (10, 20),
-        "shear_noise": (2.0, 4.0),
+        "shear_amplitude": (6, 11),
+        "shear_noise": (1.5, 3.0),
 
-        "rpm": (140, 175),
-        "current": (1.5, 2.3),
+        "rpm": (130, 165),
+        "current": (1.8, 2.5)
     },
 
-    # --------------------------------------------------------
-    # Deformable
-    # --------------------------------------------------------
     "D": {
-        "force_amplitude": (55, 80),
-        "contact_width": (11, 16),
-        "force_noise": (1.5, 3.5),
+        "force_amplitude": (65, 85),
+        "contact_width": (8.5, 12.5),
+        "force_noise": (1.8, 3.5),
 
         "shear_amplitude": (4, 9),
-        "shear_noise": (0.7, 1.5),
+        "shear_noise": (0.8, 1.8),
 
-        "rpm": (105, 140),
-        "current": (2.0, 3.0),
+        "rpm": (120, 155),
+        "current": (2.0, 2.8)
     },
 
-    # --------------------------------------------------------
-    # Granular
-    # --------------------------------------------------------
     "G": {
-        "force_amplitude": (60, 90),
-        "contact_width": (9, 14),
-        "force_noise": (4.0, 7.0),
+        "force_amplitude": (65, 92),
+        "contact_width": (8.5, 13.0),
+        "force_noise": (3.0, 5.5),
 
-        "shear_amplitude": (7, 15),
-        "shear_noise": (2.5, 5.0),
+        "shear_amplitude": (5, 11),
+        "shear_noise": (1.8, 3.5),
 
-        "rpm": (115, 150),
-        "current": (1.8, 2.8),
-    },
+        "rpm": (125, 160),
+        "current": (1.9, 2.7)
+    }
 }
 
 
