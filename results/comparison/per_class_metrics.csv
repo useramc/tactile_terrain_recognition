@@ -1,0 +1,17 @@
+Model,Class,Precision,Recall,F1
+SVM,HF,0.99,0.995,0.9925
+SVM,LF,0.9754,0.99,0.9826
+SVM,D,0.9614,0.995,0.9779
+SVM,G,0.9894,0.935,0.9614
+CNN,HF,1.0,1.0,1.0
+CNN,LF,1.0,0.995,0.9975
+CNN,D,1.0,1.0,1.0
+CNN,G,0.995,1.0,0.9975
+CNN + Augmentation,HF,1.0,1.0,1.0
+CNN + Augmentation,LF,1.0,0.995,0.9975
+CNN + Augmentation,D,0.9901,1.0,0.995
+CNN + Augmentation,G,0.995,0.99,0.9925
+Random Forest,HF,0.9899,0.98,0.9849
+Random Forest,LF,0.9563,0.985,0.9704
+Random Forest,D,0.985,0.985,0.985
+Random Forest,G,0.9745,0.955,0.9646

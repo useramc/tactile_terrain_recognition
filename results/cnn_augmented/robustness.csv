@@ -1,0 +1,3 @@
+model,clean_test_accuracy,perturbed_test_accuracy
+Original CNN,0.9988,0.9450
+Augmented CNN,0.9962,0.9925

@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from utils import save_predictions
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
@@ -164,6 +165,8 @@ def train_svm():
 
     plt.savefig(confusion_path, dpi=300)
     plt.close()
+
+    save_predictions(os.path.join(RESULTS_DIR, "predictions.csv"), y_test.values, y_pred)
 
     print("\nConfusion matrix saved to:")
     print(confusion_path)

@@ -1,0 +1,5 @@
+Model,Accuracy,Precision,Recall,F1
+SVM,0.9788,0.979,0.9788,0.9786
+CNN,0.9988,0.9988,0.9988,0.9987
+CNN + Augmentation,0.9962,0.9963,0.9962,0.9962
+Random Forest,0.9762,0.9764,0.9762,0.9763

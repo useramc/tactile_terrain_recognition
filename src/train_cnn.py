@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
+from utils import save_predictions
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score,
@@ -224,6 +225,9 @@ def main():
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
 
+    torch.manual_seed(RANDOM_STATE)
+    np.random.seed(RANDOM_STATE)
+
     X, labels = load_data()
 
     y = encode_labels(labels)
@@ -390,6 +394,12 @@ def main():
         )
     )
 
+
+    save_predictions(
+        os.path.join(RESULTS_DIR, "predictions.csv"),
+        np.array(CLASS_NAMES)[y_true],
+        np.array(CLASS_NAMES)[y_pred]
+    )
 
     print("Confusion Matrix:")
 
